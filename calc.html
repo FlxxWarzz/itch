@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⠀</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .calculator {
+            width: 320px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .calculator__display {
+            height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            font-size: 24px;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calculator__buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+
+        .calculator__buttons button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 18px;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+
+        .calculator__buttons button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.overlay.active {
+    display: flex;
+}
+
+#noResultsMessage {
+    display: none;
+    grid-column: span 3;
+    text-align: center;
+    color: gray;
+    font-size: 16px;
+    padding: 20px 0;
+}
+
+        .overlay-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            overflow-y: scroll;
+            max-height: 80%;
+            position: relative;
+        }
+
+        #gameSearch {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.games-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 0px;
+    overflow-y: scroll;
+    max-height: 300px;
+    overflow-x: hidden;
+}
+
+.game-card {
+    width: 100%;
+    padding-bottom: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: #ffffff;
+    border: 2px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-card img {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.game-card span {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 14px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px;
+    border-radius: 0 0 5px 5px;
+}
+
+
+        .game-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 960px;
+}
+
+.box {
+  width: calc(33.33% - 20px);
+  padding-bottom: calc(33.33% - 20px);
+  margin-bottom: 20px;
+  background-color: lightblue;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover; 
+  border-radius: 10px; 
+}
+
+.box .text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  line-height: 30px; 
+  font-size: 18px; 
+  color: black;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+    </style>
+</head>
+<body>
+    
+<div class="calculator">
+    <div class="calculator__display" id="display" contenteditable="true"></div>
+    <div class="calculator__buttons">
+        <button onclick="clearDisplay()">C</button>
+        <button onclick="appendToDisplay('(')">(</button>
+        <button onclick="appendToDisplay(')')">)</button>
+        <button onclick="appendToDisplay('**')">x<sup>y</sup></button>
+        <button onclick="calculate()">=</button>
+        <button onclick="appendToDisplay('7')">7</button>
+        <button onclick="appendToDisplay('8')">8</button>
+        <button onclick="appendToDisplay('9')">9</button>
+        <button onclick="appendToDisplay('/')">/</button>
+        <button onclick="appendToDisplay('*')">*</button>
+        <button onclick="appendToDisplay('4')">4</button>
+        <button onclick="appendToDisplay('5')">5</button>
+        <button onclick="appendToDisplay('6')">6</button>
+        <button onclick="appendToDisplay('+')">+</button>
+        <button onclick="appendToDisplay('-')">-</button>
+        <button onclick="appendToDisplay('1')">1</button>
+        <button onclick="appendToDisplay('2')">2</button>
+        <button onclick="appendToDisplay('3')">3</button>
+        <button onclick="appendToDisplay('Math.PI')">π</button>
+        <button onclick="appendToDisplay('Math.sqrt(')">√</button>
+        <button onclick="appendToDisplay('Math.sin(')">sin</button>
+        <button onclick="appendToDisplay('Math.cos(')">cos</button>
+        <button onclick="appendToDisplay('Math.tan(')">tan</button>
+        <button onclick="appendToDisplay('Math.log10(')">log</button>
+        <button onclick="appendToDisplay('Math.E')">e</button>
+        <button onclick="appendToDisplay('**')">x<sup>n</sup></button>
+        <button onclick="appendToDisplay('0')">0</button>
+        <button onclick="appendToDisplay('.')">.</button>
+        <button onclick="clearDisplay()">←</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="overlay-content">
+        <input type="text" id="gameSearch" placeholder="Search for a game..." 
+            style="width: 95%; padding: 10px; font-size: 16px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+        <div class="games-container" id="gamesContainer"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('gameSearch').addEventListener('input', function () {
+    const searchText = this.value.toLowerCase();
+    const gameCards = document.querySelectorAll('.game-card');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    let resultsFound = false;
+
+    gameCards.forEach(card => {
+        const gameTitle = card.querySelector('span').textContent.toLowerCase();
+        if (gameTitle.startsWith(searchText)) {
+            card.style.display = 'block';
+            resultsFound = true;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    noResultsMessage.style.display = resultsFound ? 'none' : 'block';
+});
+
+
+document.getElementById('gameSearch').addEventListener('blur', function () {
+    this.value = '';
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => (card.style.display = 'block'));
+    document.getElementById('noResultsMessage').style.display = 'none';
+});
+    
+    document.addEventListener('keydown', function(event) {
+    const key = event.key;
+    const display = document.getElementById('display');
+    const overlayActive = document.getElementById('overlay').classList.contains('active');
+    const activeElement = document.activeElement;
+
+    if (activeElement === document.getElementById('gameSearch')) {
+        return;
+    }
+
+
+    if (overlayActive) {
+        event.preventDefault();
+      }  if (/\d/.test(key) || ['/', '*', '-', '+', '(', ')', '.', 'Enter'].includes(key)) {
+            event.preventDefault();
+            if (key === 'Enter') {
+                calculate();
+            } else {
+                appendToDisplay(key);
+            }
+        } else if (key === 'Backspace') {
+            event.preventDefault();
+            clearDisplay();
+        } else if (key === 'e') {
+            event.preventDefault();
+            appendToDisplay('Math.E');
+        } else if (key === 'p') {
+            event.preventDefault();
+            appendToDisplay('Math.PI');
+        }
+});
+
+function appendToDisplay(value) {
+        const display = document.getElementById('display');
+        let currentText = display.innerText;
+
+        if (value === 'Math.sqrt(') {
+            display.innerText += '√(';
+        } else if (value === '**') {
+            display.innerText += '**';
+        } else if (['Math.sin(', 'Math.cos(', 'Math.tan(', 'Math.log10('].includes(value)) {
+            display.innerText += value.substring(5, value.length - 1) + '(';
+        } else if (value === 'Math.PI') {
+            if (currentText.endsWith('Math.E') || currentText.endsWith('π')) {
+                display.innerText += '*π';
+            } else {
+                display.innerText += 'π';
+            }
+        } else if (value === 'Math.E') {
+            if (currentText.endsWith('Math.PI') || currentText.endsWith('π')) {
+                display.innerText += '*e';
+            } else {
+                display.innerText += 'e';
+            }
+        } else {
+            const lastChar = currentText[currentText.length - 1];
+            if ((lastChar === 'π' || lastChar === 'e') && /\d/.test(value)) {
+                display.innerText += '*' + value;
+            } else {
+                display.innerText += value;
+            }
+        }
+        adjustFontSize();
+    }
+
+    function clearDisplay() {
+        const display = document.getElementById('display');
+        display.innerText = '';
+        adjustFontSize();
+    }
+
+    function adjustFontSize() {
+        const display = document.getElementById('display');
+        const textLength = display.innerText.length;
+        display.style.fontSize = textLength > 20 ? '20px' : '24px';
+    }
+
+    function toggleCalculatorInput(enable) {
+    const display = document.getElementById('display');
+    if (enable) {
+        display.contentEditable = 'true';
+    } else {
+        display.contentEditable = 'false';
+    }
+}
+
+
+    function calculate() {
+        const display = document.getElementById('display');
+        try {
+            let expression = document.getElementById('display').innerText
+                .replace(/π/g, 'Math.PI')
+                .replace(/e/g, 'Math.E')
+                .replace(/√\(/g, 'Math.sqrt(')
+                .replace(/\*\*/g, '**')
+                .replace(/sin/g, 'Math.sin')
+                .replace(/cos/g, 'Math.cos')
+                .replace(/tan/g, 'Math.tan')
+                .replace(/log/g, 'Math.log10');
+
+            const result = eval(display.innerText);
+            display.innerText = result;
+            adjustFontSize();
+
+            if (display.innerText === '0.8181818181818182') {
+                document.getElementById('overlay').classList.add('active');
+            }
+        } catch (error) {
+            display.innerText = 'Error';
+        }
+    }
+
+    document.getElementById('overlay').addEventListener('click', function(event) {
+        if (event.target === this) {
+            this.classList.remove('active');
+        }
+    });
+
+    function openGame(url) {
+        const iframeWindow = window.open('about:blank', '_blank');
+        const iframe = iframeWindow.document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100vw';
+        iframe.style.height = '100vh';
+        iframe.style.border = 'none';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.zIndex = '1000';
+        iframeWindow.document.body.appendChild(iframe);
+    }
+
+    function addGameCard(name, website, image) {
+        const container = document.getElementById('gamesContainer');
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.setAttribute('onclick', `openGame('${website}')`);
+
+        const img = document.createElement('img');
+        img.src = image;
+        img.alt = name;
+
+        const span = document.createElement('span');
+        span.textContent = name;
+
+        card.appendChild(img);
+        card.appendChild(span);
+        container.appendChild(card);
+    }
+
+    addGameCard('Pullywog', 'https://html-classic.itch.zone/html/5796049/index.html', 'https://img.gamemonetize.com/lk670uy5egcfj5um64ym1d7ngcnny8u8/512x384.jpg');
+    addGameCard('Chessformer', 'https://html-classic.itch.zone/html/3168740/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZbczdWd2uXNMUvJruxCrSAh7pEMqGEYovVA&s');
+    addGameCard('Prince Charmless', 'https://html-classic.itch.zone/html/1797206/index.html?v=1577643871', 'https://img.itch.zone/aW1nLzM1MzQ0ODkucG5n/original/Qt80Ws.png');
+    addGameCard('Super Auto Pets', 'https://html-classic.itch.zone/html/11440842/WebGL-174-Production/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4IxyKWgcK35O4CTI3yiEjLqGg_fjO9udaYQ&s');
+    addGameCard('Dark Soil', 'https://html-classic.itch.zone/html/864239/index.html?v=1542781931', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4yQ0ej9d0nAnNJLVVH_IfcHjbbczcWj8VMw&s');
+    addGameCard('Gun Knight', 'https://html-classic.itch.zone/html/3524996/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7kpECOGS2uWglsy84ekFvSQaAOKYyIuPkSA&s');
+    addGameCard('Mobs Inc', 'https://html-classic.itch.zone/html/1796576/index.html?v=1577643878', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1kFZZL35LiKZHo-EiAUW4YY7PWDliNNl-Wg&s');
+    addGameCard('Overdisk', 'https://html-classic.itch.zone/html/2913707/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShZwlyBYHYAk3rc2pnDR-44jCm7gywCPL7Jw&s');
+    addGameCard('Townseek', 'https://html-classic.itch.zone/html/3671368-456486/index.html', 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1659360/capsule_616x353.jpg?t=1729380544');
+    addGameCard('Wyst', 'https://html-classic.itch.zone/html/2117150/wyst_easter_edition/index.html?v=1591302052', 'https://img.itch.zone/aW1hZ2UvNDc0MzUvOTM0Nzc5LnBuZw==/original/E6GS4%2B.png');
+    addGameCard('Polytrack', 'https://html-classic.itch.zone/html/11880944/index.html', 'https://img.itch.zone/aW1nLzEzNzgyNzE0LnBuZw==/original/4EROKt.png');
+    addGameCard('Heal Me Plz', 'https://html-classic.itch.zone/html/2181896/index.html?v=1591301886', 'https://img.itch.zone/aW1nLzUwNjA1MTEuZ2lm/347x500m/yorn%2B6.gif');
+    addGameCard('Portaboy +', 'https://html-classic.itch.zone/html/6826065/index.html', 'https://img.itch.zone/aW1nLzEwMjcyMTg4LmdpZg==/original/rkQsba.gif');
+    addGameCard('Out of Ctrl', 'https://html-classic.itch.zone/html/6826065/index.html', 'https://img.itch.zone/aW1nLzQ5MTE2MjkuZ2lm/original/btp0Wt.gif');
+    addGameCard('Poda', 'https://html-classic.itch.zone/html/6604322/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNr8b9yFCUE-f6WvJKthllt8tRyrQRUeFGAg&s');
+    addGameCard('Handshakes', 'https://html-classic.itch.zone/html/6448722/index.html', 'https://img.itch.zone/aW1nLzk2Njg0MTQuZ2lm/508x254%23mbm/chJbLO.gif');
+    addGameCard('Flip Flop', 'https://html-classic.itch.zone/html/3716883/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiCusac6kAG8unJmB0y2Nyes-SVCD4q8x9LA&s');
+    addGameCard('Mingle', 'https://html-classic.itch.zone/html/4107468/mingle/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOOlbilqLjIgTfxFye2oZVxFivUtt34SgH8w&s');
+    addGameCard('Block Steady', 'https://html-classic.itch.zone/html/1642963/Block%20Steady/index.html?v=1574335049', 'https://img.itch.zone/aW1nLzIzNjEyMDkucG5n/315x250%23c/R4ufoS.png');
+    addGameCard('Edna', 'https://html-classic.itch.zone/html/2521071/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-sqxoLYfLqpYraXVPJakx4GEwRPjo4Zdn1w&s');
+    addGameCard('Cleaning the System', 'https://html-classic.itch.zone/html/5667956/index.html', 'https://img.itch.zone/aW1hZ2UvNjk1Njk2LzM4MzQwNzYucG5n/original/dFhyWR.png');
+    addGameCard('Deepest Sword', 'https://html-classic.itch.zone/html/4017918/index.html', 'https://img.itch.zone/aW1nLzU3OTM0OTYuZ2lm/original/tRnag0.gif');
+    addGameCard('Static Cling', 'https://html-classic.itch.zone/html/4150297/index.html', 'https://img.itch.zone/aW1nLzYyNDYxNzcuanBn/original/V8i6aU.jpg');
+    addGameCard('Stargrove Scramble', 'https://html-classic.itch.zone/html/4625085/index.html', 'https://img.itch.zone/aW1nLzY2MTg1NzMucG5n/original/5l6mFH.png');
+    addGameCard('Game Inside a Game', 'https://html-classic.itch.zone/html/2962883/index.html', 'https://img.itch.zone/aW1nLzQ1OTUwODcucG5n/original/Xdhfjt.png');
+    addGameCard('Empty', 'https://html-classic.itch.zone/html/8967830/empty-webgl/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAzKeRvtJtLLTrMGWSGbRzNYwYabHn57Nrqw&s');
+    addGameCard('Cell Machine', 'https://html-classic.itch.zone/html/2472216/index.html', 'https://img.itch.zone/aW1hZ2UvNjk2NTIxLzM4MzkwMjgucG5n/original/fusfhU.png');
+    addGameCard('Possessed', 'https://html-classic.itch.zone/html/2484693/index.html', 'https://img.itch.zone/aW1nLzM4ODQ5NzcucG5n/original/9HQnsv.png');
+    addGameCard('Combo Pool', 'https://html-classic.itch.zone/html/9331874/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRGTw5pdMwU2_fuItpaa6PrikcsO2WW2C7MQ&s');
+    addGameCard('Tiny Fragments', 'https://html-classic.itch.zone/html/2404173/index.html', 'https://img.itch.zone/aW1nLzM2NDMwNTQuZ2lm/original/DmPOJx.gif');
+    addGameCard('Sonic Revert', 'https://html-classic.itch.zone/html/3962593/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlDt5zIiI38G3RBroECg4qUuA40y20bzr4Cw&s');
+    addGameCard('Oops No Breaks', 'https://html-classic.itch.zone/html/4391468/oopsNoBrakes/index.html', 'https://img.itch.zone/aW1nLzY4OTAzMDUuZ2lm/315x250%23cm/PEYBPv.gif');
+    addGameCard('10 Minutes till Dawn', 'https://html-classic.itch.zone/html/5833734/10MinutesTillDawnWebGL/index.html', 'https://img.itch.zone/aW1nLzg3MTU5NzMucG5n/original/0LqGxb.png');
+    addGameCard('Shogun Showdown', 'https://html-classic.itch.zone/html/6187898/ShogunShowdown_WebGL/index.html', 'https://img.itch.zone/aW1nLzExNjA1MjU3LnBuZw==/original/zDJFNd.png');
+    addGameCard('Lose95', 'https://html-classic.itch.zone/html/5652546/index.html', 'https://img.itch.zone/aW1nLzg1ODk3MDQuZ2lm/original/TuMDTk.gif');
+    addGameCard('Forward', 'https://html-classic.itch.zone/html/1314748/index.html?v=1574335913', 'https://img.itch.zone/aW1nLzE5MjA5NDAucG5n/original/ro6oVw.png');
+    addGameCard('The Lesser Evil', 'https://html-classic.itch.zone/html/4604027/TheLesserEvil_Web/index.html', 'https://img.itch.zone/aW1nLzcxNTQ3NzcuZ2lm/original/qAy8V4.gif');
+    addGameCard('Ducksoup Dungeon', 'https://html-classic.itch.zone/html/655684/index.html?v=1542781847', 'https://img.itch.zone/aW1hZ2UvOTE5NzMvNDMxOTIzLmdpZg==/original/g4veHi.gif');
+    addGameCard('Drift Hunters', 'https://html-classic.itch.zone/html/1792221/ItchIO/index.html?v=1574649458', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlF0Tpkg6BuaSYjsPRgHssQvVXSbIf6gZuYQ&s');
+    addGameCard('Frog Corral', 'https://html-classic.itch.zone/html/8323474/index.html', 'https://img.itch.zone/aW1nLzExMzQ2MzgyLnBuZw==/original/6pV3Xa.png');
+    addGameCard('Nomnom', 'https://html-classic.itch.zone/html/9503589/Web_Build_01_2024_v2/index.html', 'https://img.itch.zone/aW1nLzEwNDQxNjEwLmdpZg==/original/oR0QNR.gif');
+    addGameCard('Feather Park', 'https://html-classic.itch.zone/html/6581665/FeatherParkWeb/index.html', 'https://i.ytimg.com/vi/qTA7fbdAcP0/maxresdefault.jpg');
+    addGameCard('Rocks and Ravens', 'https://html-classic.itch.zone/html/904667/index.html?v=1542782145', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTy4L6rpWj50vBpxKZrg3tFrjuvPQLYeofxTQ&s');
+    addGameCard('Kobold Siege', 'https://html-classic.itch.zone/html/4794439/KoboldSiegev21/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe4mHObjky0n1FXlNrAmjrow5amTYEGYS_ag&s');
+    addGameCard('Growmi', 'https://html-classic.itch.zone/html/7612919/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlbM4j7OhxAy7-tWHUskrCbntCysKLAgngGQ&s');
+    addGameCard('Cataractae', 'https://html-classic.itch.zone/html/4823443/index.html', 'https://img.itch.zone/aW1nLzc1MDE1NTUucG5n/original/uto6Hx.png');
+    addGameCard('Wonder Flower', 'https://html-classic.itch.zone/html/5257904/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgL5uXhN2d1yOkrehxSbhhYEaxBdxxdGSY3Q&s');
+    addGameCard('ScubaBear', 'https://html-classic.itch.zone/html/360505/index.html?v=1542782066', 'https://img.itch.zone/aW1nLzk3NjA5MTcuanBlZw==/original/YW4Kkw.jpeg');
+    addGameCard('Cave Buster', 'https://html-classic.itch.zone/html/5869811/CaveBuster_Web_1.1/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKC35moiIJCGNysI22OiG0h2kagQirs4Arow&s');    
+    addGameCard('Ascent', 'https://html-classic.itch.zone/html/6414077/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_YEOBQ3Q0uFeMJyyrm7h-tMCKdrgCRAm3Eg&s');
+    addGameCard('Shrong', 'https://html-classic.itch.zone/html/6462395/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCwtBwkK27jFG3YyInmgdQgzlSNmVB8m4lfA&s');
+    addGameCard('Karlson GB', 'https://html-classic.itch.zone/html/6355300/index.html', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLrdBDObz1f55QW9Dggf63sUlRpk2nhHQ2lQ&s');
+    addGameCard('Media Player','https://webvideoplayer.org/player.html','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpBAm48H8Vlsc_-JsAZfN5JuxaBOclmF4adQ&s')
+</script>
+
+</body>
+</html>
